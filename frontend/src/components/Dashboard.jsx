@@ -89,15 +89,18 @@ const Dashboard = () => {
       setSubmitting(true);
       setError('');
       const newStatus = currentStatus === 'Pending' ? 'Completed' : 'Pending';
+      console.log('Updating task status:', { taskId, currentStatus, newStatus });
       await taskAPI.updateTaskStatus(taskId, newStatus);
       
       // Optimistically update the task in the list
       setTasks(prevTasks => prevTasks.map(task => 
         task._id === taskId ? { ...task, status: newStatus } : task
       ));
+      console.log('Task status updated successfully');
     } catch (err) {
-      setError('Failed to update task status');
-      console.error(err);
+      setError('Failed to update task status: ' + (err.response?.data?.message || err.message));
+      console.error('Status update error:', err);
+      console.error('Error response:', err.response);
       // Refresh on error to ensure consistency
       await fetchData();
     } finally {
@@ -259,106 +262,94 @@ const Dashboard = () => {
         )}
 
         {/* Stats */}
-        <div className="space-y-6 mb-8">
-          {/* General Stats */}
-          <div>
-            <h2 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-yellow-400' : 'text-gray-600'}`}>OVERVIEW</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className={`rounded-xl shadow-lg p-6 border-l-4 ${isDarkMode ? 'bg-gray-900 border-yellow-500' : 'bg-white border-blue-500'}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`text-sm font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>Total Tasks</p>
-                    <p className={`text-3xl font-bold mt-2 ${isDarkMode ? 'text-yellow-500' : 'text-blue-600'}`}>{stats.total}</p>
-                  </div>
-                  <div className={`rounded-full p-3 ${isDarkMode ? 'bg-yellow-900' : 'bg-blue-100'}`}>
-                    <svg className={`w-8 h-8 ${isDarkMode ? 'text-yellow-500' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                  </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+          {/* Total Tasks */}
+          <div className={`rounded-xl shadow-lg p-4 border-l-4 ${isDarkMode ? 'bg-gray-900 border-yellow-500' : 'bg-white border-blue-500'}`}>
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <p className={`text-xs font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>Total Tasks</p>
+                <div className={`rounded-full p-2 ${isDarkMode ? 'bg-yellow-900' : 'bg-blue-100'}`}>
+                  <svg className={`w-4 h-4 ${isDarkMode ? 'text-yellow-500' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
                 </div>
               </div>
-
-              <div className={`rounded-xl shadow-lg p-6 border-l-4 ${isDarkMode ? 'bg-gray-900 border-yellow-600' : 'bg-white border-purple-500'}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`text-sm font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>My Tasks</p>
-                    <p className={`text-3xl font-bold mt-2 ${isDarkMode ? 'text-yellow-600' : 'text-purple-600'}`}>{stats.myTasks}</p>
-                  </div>
-                  <div className={`rounded-full p-3 ${isDarkMode ? 'bg-yellow-900' : 'bg-purple-100'}`}>
-                    <svg className={`w-8 h-8 ${isDarkMode ? 'text-yellow-600' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
+              <p className={`text-2xl font-bold ${isDarkMode ? 'text-yellow-500' : 'text-blue-600'}`}>{stats.total}</p>
             </div>
           </div>
 
-          {/* Pending Stats */}
-          <div>
-            <h2 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-yellow-400' : 'text-gray-600'}`}>PENDING TASKS</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className={`rounded-xl shadow-lg p-6 border-l-4 ${isDarkMode ? 'bg-gray-900 border-yellow-400' : 'bg-white border-orange-500'}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`text-sm font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>All Pending</p>
-                    <p className={`text-3xl font-bold mt-2 ${isDarkMode ? 'text-yellow-400' : 'text-orange-600'}`}>{stats.allPending}</p>
-                  </div>
-                  <div className={`rounded-full p-3 ${isDarkMode ? 'bg-yellow-900' : 'bg-orange-100'}`}>
-                    <svg className={`w-8 h-8 ${isDarkMode ? 'text-yellow-400' : 'text-orange-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
+          {/* My Tasks */}
+          <div className={`rounded-xl shadow-lg p-4 border-l-4 ${isDarkMode ? 'bg-gray-900 border-yellow-600' : 'bg-white border-purple-500'}`}>
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <p className={`text-xs font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>My Tasks</p>
+                <div className={`rounded-full p-2 ${isDarkMode ? 'bg-yellow-900' : 'bg-purple-100'}`}>
+                  <svg className={`w-4 h-4 ${isDarkMode ? 'text-yellow-600' : 'text-purple-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
               </div>
-
-              <div className={`rounded-xl shadow-lg p-6 border-l-4 ${isDarkMode ? 'bg-gray-900 border-orange-400' : 'bg-white border-orange-400'}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`text-sm font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>My Pending</p>
-                    <p className={`text-3xl font-bold mt-2 ${isDarkMode ? 'text-orange-400' : 'text-orange-500'}`}>{stats.myPending}</p>
-                  </div>
-                  <div className={`rounded-full p-3 ${isDarkMode ? 'bg-yellow-900' : 'bg-orange-50'}`}>
-                    <svg className={`w-8 h-8 ${isDarkMode ? 'text-orange-400' : 'text-orange-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
+              <p className={`text-2xl font-bold ${isDarkMode ? 'text-yellow-600' : 'text-purple-600'}`}>{stats.myTasks}</p>
             </div>
           </div>
 
-          {/* Completed Stats */}
-          <div>
-            <h2 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-yellow-400' : 'text-gray-600'}`}>COMPLETED TASKS</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className={`rounded-xl shadow-lg p-6 border-l-4 ${isDarkMode ? 'bg-gray-900 border-yellow-300' : 'bg-white border-green-500'}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`text-sm font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>All Completed</p>
-                    <p className={`text-3xl font-bold mt-2 ${isDarkMode ? 'text-yellow-300' : 'text-green-600'}`}>{stats.allCompleted}</p>
-                  </div>
-                  <div className={`rounded-full p-3 ${isDarkMode ? 'bg-yellow-900' : 'bg-green-100'}`}>
-                    <svg className={`w-8 h-8 ${isDarkMode ? 'text-yellow-300' : 'text-green-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
+          {/* All Pending */}
+          <div className={`rounded-xl shadow-lg p-4 border-l-4 ${isDarkMode ? 'bg-gray-900 border-yellow-400' : 'bg-white border-orange-500'}`}>
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <p className={`text-xs font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>All Pending</p>
+                <div className={`rounded-full p-2 ${isDarkMode ? 'bg-yellow-900' : 'bg-orange-100'}`}>
+                  <svg className={`w-4 h-4 ${isDarkMode ? 'text-yellow-400' : 'text-orange-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
               </div>
+              <p className={`text-2xl font-bold ${isDarkMode ? 'text-yellow-400' : 'text-orange-600'}`}>{stats.allPending}</p>
+            </div>
+          </div>
 
-              <div className={`rounded-xl shadow-lg p-6 border-l-4 ${isDarkMode ? 'bg-gray-900 border-yellow-500' : 'bg-white border-green-600'}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className={`text-sm font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>My Completed</p>
-                    <p className={`text-3xl font-bold mt-2 ${isDarkMode ? 'text-yellow-500' : 'text-green-700'}`}>{stats.myCompleted}</p>
-                  </div>
-                  <div className={`rounded-full p-3 ${isDarkMode ? 'bg-yellow-900' : 'bg-green-100'}`}>
-                    <svg className={`w-8 h-8 ${isDarkMode ? 'text-yellow-500' : 'text-green-700'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
+          {/* My Pending */}
+          <div className={`rounded-xl shadow-lg p-4 border-l-4 ${isDarkMode ? 'bg-gray-900 border-orange-400' : 'bg-white border-orange-400'}`}>
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <p className={`text-xs font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>My Pending</p>
+                <div className={`rounded-full p-2 ${isDarkMode ? 'bg-yellow-900' : 'bg-orange-50'}`}>
+                  <svg className={`w-4 h-4 ${isDarkMode ? 'text-orange-400' : 'text-orange-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                 </div>
               </div>
+              <p className={`text-2xl font-bold ${isDarkMode ? 'text-orange-400' : 'text-orange-500'}`}>{stats.myPending}</p>
+            </div>
+          </div>
+
+          {/* All Completed */}
+          <div className={`rounded-xl shadow-lg p-4 border-l-4 ${isDarkMode ? 'bg-gray-900 border-yellow-300' : 'bg-white border-green-500'}`}>
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <p className={`text-xs font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>All Completed</p>
+                <div className={`rounded-full p-2 ${isDarkMode ? 'bg-yellow-900' : 'bg-green-100'}`}>
+                  <svg className={`w-4 h-4 ${isDarkMode ? 'text-yellow-300' : 'text-green-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+              <p className={`text-2xl font-bold ${isDarkMode ? 'text-yellow-300' : 'text-green-600'}`}>{stats.allCompleted}</p>
+            </div>
+          </div>
+
+          {/* My Completed */}
+          <div className={`rounded-xl shadow-lg p-4 border-l-4 ${isDarkMode ? 'bg-gray-900 border-yellow-500' : 'bg-white border-green-600'}`}>
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between mb-2">
+                <p className={`text-xs font-medium ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>My Completed</p>
+                <div className={`rounded-full p-2 ${isDarkMode ? 'bg-yellow-900' : 'bg-green-100'}`}>
+                  <svg className={`w-4 h-4 ${isDarkMode ? 'text-yellow-500' : 'text-green-700'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              </div>
+              <p className={`text-2xl font-bold ${isDarkMode ? 'text-yellow-500' : 'text-green-700'}`}>{stats.myCompleted}</p>
             </div>
           </div>
         </div>
