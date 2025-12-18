@@ -6,7 +6,9 @@ const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 30000, // 30 seconds for Render wake-up time
+  withCredentials: true
 });
 
 // Add token to requests
@@ -19,6 +21,19 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response error handler
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout - Server might be waking up. Please try again.');
+    } else if (!error.response) {
+      console.error('Network error - Check if backend is running');
+    }
     return Promise.reject(error);
   }
 );
