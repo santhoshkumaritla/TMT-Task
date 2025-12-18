@@ -223,7 +223,7 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-yellow-500' : 'text-blue-600'}`}>Task Manager</h1>
+              <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-yellow-500' : 'text-blue-600'}`}>Task Management System</h1>
               <p className={`mt-1 ${isDarkMode ? 'text-yellow-200' : 'text-gray-600'}`}>Welcome back, {user?.name}!</p>
             </div>
             <div className="flex gap-3 items-center">

@@ -1,4 +1,4 @@
-# Task Management Team (TMT) Task
+# Task Management System
 
 A full-stack task management application with authentication, dark mode, and comprehensive task tracking features. Built with React, Node.js, Express, and MongoDB.
 
