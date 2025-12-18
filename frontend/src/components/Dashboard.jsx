@@ -658,7 +658,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      /* Delete Confirmation Modal */
+      
       {showDeleteModal && taskToDelete && (
         <div className={`fixed inset-0 flex items-center justify-center p-4 z-50 ${isDarkMode ? 'bg-black bg-opacity-80' : 'bg-black bg-opacity-50'}`}>
           <div className={`rounded-2xl shadow-2xl w-full max-w-md p-8 ${isDarkMode ? 'bg-gray-900 border-2 border-yellow-600' : 'bg-white'}`}>
